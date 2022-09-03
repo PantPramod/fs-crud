@@ -15,8 +15,12 @@ app.use('/static', express.static(path.join(__dirname, 'public')))
 app.use(express.json());
 
 app.get('/', async (req, res) => {
-    const data = await fs.promises.readdir(path.join(__dirname, 'public'));
-    res.json([...data])
+    try {
+        const data = await fs.promises.readdir(path.join(__dirname, 'public'));
+        res.json([...data])
+    } catch (err) {
+        res.send(err.message)
+    }
 })
 
 
@@ -24,7 +28,7 @@ app.get('/', async (req, res) => {
 app.get('/read/:filename', async (req, res) => {
 
     const filename = req.params.filename;
-
+     try{    
     const data = await fs.promises.readdir(path.join(__dirname, 'public'));
     console.log("data==>", data);
     if (data.includes(`${filename}`)) {
@@ -34,11 +38,15 @@ app.get('/read/:filename', async (req, res) => {
             res.send(data)
         })
     }
+}catch(err){
+    res.send(err.message)
+}
 
 })
 
 app.get('/createFile', urlencodedParser, async (req, res) => {
     const fileName = req.query.filename
+   try{
     const data = await fs.promises.readdir(path.join(__dirname, 'public'));
     if (!data.includes(`${fileName}.txt`)) {
         fs.writeFile(`public/${fileName}.txt`, '', (err) => {
@@ -48,6 +56,9 @@ app.get('/createFile', urlencodedParser, async (req, res) => {
     } else {
         res.send("This named File already exist")
     }
+}catch(err){
+    res.send(err.message)
+}
 })
 
 app.post('/write/:filename', (req, res) => {
